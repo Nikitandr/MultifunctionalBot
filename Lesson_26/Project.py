@@ -63,6 +63,23 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_width * pos_x + 15, tile_height * pos_y + 5)
 
 
+class Camera:
+    # зададим начальный сдвиг камеры
+    def __init__(self):
+        self.dx = 0
+        self.dy = 0
+
+    # сдвинуть объект obj на смещение камеры
+    def apply(self, obj):
+        obj.rect.x += self.dx
+        obj.rect.y += self.dy
+
+    # позиционировать камеру на объекте target
+    def update(self, target):
+        self.dx = -(target.rect.x + target.rect.w // 2 - width // 2)
+        self.dy = -(target.rect.y + target.rect.h // 2 - height // 2)
+
+
 def start_screen():
     intro_text = ["Правила игры:",
                   "Выберись из лабиринта,"]
@@ -90,13 +107,13 @@ def start_screen():
         pygame.display.flip()
 
 
-sizes = width, height = 1000, 1100
+sizes = width, height = 900, 700
 tile_width, tile_height = 50, 50
 screen, running, player = pygame.display.set_mode(sizes), True, None
 tile_images, player_image = pygame.transform.scale(load_image('wall.png'), (50, 50)), load_image('mario.png')
 all_sprites, tiles_group, player_group = pygame.sprite.Group(), pygame.sprite.Group(), pygame.sprite.Group()
 
-player = generate_level(load_level('map.txt'))
+player, camera = generate_level(load_level('map.txt')), Camera()
 start_screen()
 
 while running:
@@ -125,6 +142,9 @@ while running:
                 if pygame.sprite.spritecollideany(player, tiles_group):
                     player.rect.x -= 1
 
+    for sprite in all_sprites:
+        camera.apply(sprite)
+    camera.update(player)
     tiles_group.draw(screen)
     player_group.draw(screen)
     pygame.display.flip()
