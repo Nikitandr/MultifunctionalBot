@@ -53,13 +53,6 @@ def generate_level(level):
     return player
 
 
-# class Fon(pygame.sprite.Sprite):
-#     def __init__(self, pos_x, pos_y):
-#         super().__init__(fon_group, all_sprites)
-#         self.image = fon_image
-#         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
-
-
 class Tile(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(tiles_group, all_sprites)
@@ -100,17 +93,14 @@ class Exit(pygame.sprite.Sprite):
 
 
 class Camera:
-    # зададим начальный сдвиг камеры
     def __init__(self):
         self.dx = 0
         self.dy = 0
 
-    # сдвинуть объект obj на смещение камеры
     def apply(self, obj):
         obj.rect.x += self.dx
         obj.rect.y += self.dy
 
-    # позиционировать камеру на объекте target
     def update(self, target):
         self.dx = -(target.rect.x + target.rect.w // 2 - width // 2)
         self.dy = -(target.rect.y + target.rect.h // 2 - height // 2)
@@ -175,8 +165,10 @@ tile_width, tile_height = 50, 50
 screen, running = pygame.display.set_mode(sizes), True
 camera = Camera()
 
-flag_image, portal_image = pygame.transform.scale(load_image('flag.png'), (25, 25)), pygame.transform.scale(load_image('portal.png'), (50, 50))
-tile_image, player_image = pygame.transform.scale(load_image('wall.png'), (50, 50)), pygame.transform.scale(load_image('hero.png', -1), (24, 40))
+flag_image = pygame.transform.scale(load_image('flag.png'), (25, 25))
+portal_image = pygame.transform.scale(load_image('portal.png'), (50, 50))
+tile_image = pygame.transform.scale(load_image('wall.png'), (50, 50))
+player_image = pygame.transform.scale(load_image('hero.png', -1), (24, 40))
 exit_image = pygame.transform.scale(load_image('exit.png'), (50, 50))
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
@@ -185,8 +177,6 @@ flags_group = pygame.sprite.Group()
 fon_group = pygame.sprite.Group()
 portal_group = pygame.sprite.Group()
 exit_group = pygame.sprite.Group()
-
-# fon_image = pygame.transform.scale(load_image('fon.png'), (50, 10))
 
 player = generate_level(load_level('map1.txt'))
 start_screen()
