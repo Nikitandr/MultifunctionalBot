@@ -55,10 +55,10 @@ while running:
 
             spn = [spn_x, spn_y]
             map_params = {
-                "ll": "37.617635,55.755814",
-                "spn": ','.join(spn),
-                "l": "map"
-            }
+                         "ll": "37.617635,55.755814",
+                         "spn": ','.join(spn),
+                         "l": "map"
+                         }
 
             try:
                 response = requests.get(map_api_server, params=map_params)
