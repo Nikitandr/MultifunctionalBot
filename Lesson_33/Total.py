@@ -44,14 +44,26 @@ while running:
             running = False
 
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_DOWN:
+            if event.key == pygame.K_PAGEUP:
                 if float(spn_x) < 10:
-                    spn_x = str(float(spn_x) + 1)
-                    spn_y = str(float(spn_y) + 1)
-            elif event.key == pygame.K_UP:
+                    if float(spn_x) < 3:
+                        spn_x = str(float(spn_x) + 0.5)
+                        spn_y = str(float(spn_y) + 0.5)
+                        print(spn_x)
+                    elif float(spn_x) >= 3:
+                        spn_x = str(float(spn_x) + 1)
+                        spn_y = str(float(spn_y) + 1)
+                        print(spn_x)
+            elif event.key == pygame.K_PAGEDOWN:
                 if float(spn_x) > 0.2:
-                    spn_x = str(float(spn_x) - 1)
-                    spn_y = str(float(spn_y) - 1)
+                    if float(spn_x) < 3:
+                        spn_x = str(float(spn_x) - 0.5)
+                        spn_y = str(float(spn_y) - 0.5)
+                        print(spn_x)
+                    if float(spn_x) >= 3:
+                        spn_x = str(float(spn_x) - 1)
+                        spn_y = str(float(spn_y) - 1)
+                        print(spn_x)
 
             spn = [spn_x, spn_y]
             map_params = {
