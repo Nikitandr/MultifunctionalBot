@@ -6,9 +6,10 @@ import requests
 running = True
 map_api_server = "http://static-maps.yandex.ru/1.x/"
 spn_x, spn_y = "1.1", "1.1"
+ll_x, ll_y = "37.617635", "55.755814"
 spn = [spn_x, spn_y]
 map_params = {
-             "ll": "37.617635,55.755814",
+             "ll": (ll_x + "," + ll_y),
              "spn": ','.join(spn),
              "l": "map"
              }
@@ -49,21 +50,17 @@ while running:
                     if float(spn_x) < 3:
                         spn_x = str(float(spn_x) + 0.5)
                         spn_y = str(float(spn_y) + 0.5)
-                        print(spn_x)
                     elif float(spn_x) >= 3:
                         spn_x = str(float(spn_x) + 1)
                         spn_y = str(float(spn_y) + 1)
-                        print(spn_x)
             elif event.key == pygame.K_PAGEDOWN:
                 if float(spn_x) > 0.2:
                     if float(spn_x) < 3:
                         spn_x = str(float(spn_x) - 0.5)
                         spn_y = str(float(spn_y) - 0.5)
-                        print(spn_x)
                     if float(spn_x) >= 3:
                         spn_x = str(float(spn_x) - 1)
                         spn_y = str(float(spn_y) - 1)
-                        print(spn_x)
             elif event.key == pygame.K_UP:
                         ll_y = str(float(ll_y) + 0.100000)
             elif event.key == pygame.K_DOWN:
