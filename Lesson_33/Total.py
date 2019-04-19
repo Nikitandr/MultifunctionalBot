@@ -64,12 +64,21 @@ while running:
                         spn_x = str(float(spn_x) - 1)
                         spn_y = str(float(spn_y) - 1)
                         print(spn_x)
+            elif event.key == pygame.K_UP:
+                        ll_y = str(float(ll_y) + 0.100000)
+            elif event.key == pygame.K_DOWN:
+                        ll_y = str(float(ll_y) - 0.100000)
+            elif event.key == pygame.K_LEFT:
+                        ll_x = str(float(ll_x) - 0.100000)
+            elif event.key == pygame.K_RIGHT:
+                        ll_x = str(float(ll_x) + 0.100000)
 
             spn = [spn_x, spn_y]
+            ll = ll_x + "," + ll_y
             map_params = {
-                         "ll": "37.617635,55.755814",
-                         "spn": ','.join(spn),
-                         "l": "map"
+                          "ll": ll,
+                          "spn": ','.join(spn),
+                          "l": "map"
                          }
 
             try:
