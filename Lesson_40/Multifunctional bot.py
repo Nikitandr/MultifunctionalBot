@@ -4,7 +4,7 @@ import requests
 from time import sleep
 from sys import executable
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
-from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
+from telegram.ext import Updater, MessageHandler, Filters, CommandHandler, ConversationHandler
 from Items import item
 
 TOKEN = "857441667:AAG7cUed0t0RKMTD3uDhLz3ZWt61un-UJUU"
@@ -39,6 +39,73 @@ def setup_proxy_and_start(token, proxy=True):
         exit(0)
 
 
+def show_keyboard(bot, update):
+    update.message.reply_text("Чтобы убрать клавиатуру нипиши /close", reply_markup=markup)
+
+
+def close_keyboard(bot, update):
+    update.message.reply_text("Ok", reply_markup=ReplyKeyboardRemove())
+
+
+def start(bot, update, user_data):
+    user_data["diary"] = {}
+    update.message.reply_text("Привет! Я многофункциональный бот!\n"
+                              "Если не знаешь, что я могу, напиши /help")
+
+
+def stop(dot, update, user_data):
+    user_data["work"] = "None"
+    update.message.reply_text("Отдохну пока что.", reply_markup=ReplyKeyboardRemove())
+    return ConversationHandler.END
+
+
+def help(bot, update):
+    update.message.reply_text("Сейчас я ничего не делаю, но могу:\n"
+                              "Быть переводчиком, для этого напиши /translater\n"
+                              "Быть геокодером, для этого напиши /geokoder\n"
+                              "Быть продавцем, для этого напиши /seller\n"
+                              "Быть ежидневником, для этого напиши /diary")
+
+
+def translater_description(bot, update, user_data):
+    user_data["lang"], user_data["work"] = "ru-en", "translater"
+    update.message.reply_text("Теперь я переводчик.\n"
+                              "Я перевожу с русского на английский.\n"
+                              "Чтобы поменять - напиши /show\n"
+                              "Чтобы отключить функцию переводчика напиши /stop")
+
+
+def RusEng(bot, update, user_data):
+    user_data["lang"] = "ru-en"
+
+
+def EngRus(dot, update, user_data):
+    user_data["lang"] = "en-ru"
+
+
+def translater(word, lang):
+    accompanying_text = "Переведено сервисом «Яндекс.Переводчик» http://translate.yandex.ru/."
+    translator_uri = "https://translate.yandex.net/api/v1.5/tr.json/translate"
+    response = requests.get(
+                            translator_uri,
+                            params={
+                                    "key": "trnsl.1.1.20190412T105229Z.39209ab058b86687.4e9bbcab1feb75b5fc753770cdda61d8ca257963",
+                                    "lang": lang,
+                                    "text": word
+                                    }
+                            )
+
+    answer = ("\n\n".join([response.json()["text"][0]]))
+    return answer
+
+
+def geocoder_description(bot, update, user_data):
+    user_data["work"] = "geocoder"
+    update.message.reply_text("Теперь я геокодер.\n"
+                              "Напиши название города и я покажу его тебе\n"
+                              "Чтобы отключить функцию геокодера напиши /stop")
+
+
 def get_ll_spn(toponym):
     # Координаты центра топонима:
     toponym_coodrinates = toponym["Point"]["pos"]
@@ -63,70 +130,6 @@ def get_ll_spn(toponym):
     span = "{dx},{dy}".format(**locals())
 
     return (ll, span)
-
-
-def show_keyboard(bot, update):
-    update.message.reply_text("Чтобы убрать клавиатуру нипиши /close", reply_markup=markup)
-
-
-def close_keyboard(bot, update):
-    update.message.reply_text("Ok", reply_markup=ReplyKeyboardRemove())
-
-
-def start(bot, update):
-    update.message.reply_text("Привет! Я многофункциональный бот!\n"
-                              "Если не знаешь, что я могу, напиши /help")
-
-
-def stop(dot, update, user_data):
-    user_data["work"] = "None"
-    update.message.reply_text("Отдохну пока что.", reply_markup=ReplyKeyboardRemove())
-
-
-def help(bot, update):
-    update.message.reply_text("Сейчас я ничего не делаю, но могу:\n"
-                              "Быть переводчиком, для этого напиши /translater\n"
-                              "Быть геокодером, для этого напиши /geokoder\n"
-                              "Быть продавцем, для этого напиши /seller")
-
-
-def translater_description(bot, update, user_data):
-    user_data["lang"], user_data["work"] = "ru-en", "translater"
-    update.message.reply_text("Теперь я переводчик.\n"
-                              "Я перевожу с русского на английский.\n"
-                              "Чтобы поменять - напиши /show\n"
-                              "Чтобы отключить функцию переводчика напиши /stop")
-
-
-def translater(word, lang):
-    accompanying_text = "Переведено сервисом «Яндекс.Переводчик» http://translate.yandex.ru/."
-    translator_uri = "https://translate.yandex.net/api/v1.5/tr.json/translate"
-    response = requests.get(
-                            translator_uri,
-                            params={
-                                    "key": "trnsl.1.1.20190412T105229Z.39209ab058b86687.4e9bbcab1feb75b5fc753770cdda61d8ca257963",
-                                    "lang": lang,
-                                    "text": word
-                                    }
-                            )
-
-    answer = ("\n\n".join([response.json()["text"][0]]))
-    return answer
-
-
-def RusEng(bot, update, user_data):
-    user_data["lang"] = "ru-en"
-
-
-def EngRus(dot, update, user_data):
-    user_data["lang"] = "en-ru"
-
-
-def geocoder_description(bot, update, user_data):
-    user_data["work"] = "geocoder"
-    update.message.reply_text("Теперь я геокодер.\n"
-                              "Напиши название города и я покажу его тебе\n"
-                              "Чтобы отключить функцию переводчика напиши /stop")
 
 
 def geocoder(address):
@@ -168,6 +171,49 @@ def seller(answer, new_item):
     return answer
 
 
+def diary_description(bot, update, user_data):
+    user_data["work"] = "diary"
+    update.message.reply_text("Теперь я ежедневник.\n"
+                              "Чтобы отключить функцию напиши /stop\n"
+                              "Чтобы прочитать ежедневник напиши /open\n"
+                              "Про какой день ты хочешь написать?")
+    return 1
+
+
+def day(bot, update, user_data):
+    user_data["day"] = update.message.text
+    update.message.reply_text("Теперь пиши, что было.")
+    return 2
+
+
+def info(bot, update, user_data):
+    if user_data["day"] in user_data["diary"]:
+        user_data["diary"][user_data["day"]] += " " + update.message.text
+    else:
+        user_data["diary"][user_data["day"]] = update.message.text
+    update.message.reply_text("Про какой еще день хочешь написать?")
+    return 1
+
+
+def open_diary(bot, update, user_data):
+    try:
+        for i in user_data["diary"]:
+            update.message.reply_text("{}:\n"
+                                      "{}".format(i, user_data["diary"][i]))
+    except:
+        update.message.reply_text("Хмм, кажется дальше не дописано.")
+
+
+conv_handler = ConversationHandler(
+                                   entry_points=[CommandHandler("diary", diary_description, pass_user_data=True)],
+                                   states={
+                                           1: [MessageHandler(Filters.text, day, pass_user_data=True)],
+                                           2: [MessageHandler(Filters.text, info, pass_user_data=True)]
+                                          },
+                                   fallbacks=[CommandHandler('stop', stop, pass_user_data=True)]
+                                  )
+
+
 def total(bot, updater, user_data):
     if user_data["work"] == "geocoder":
         address = updater.message.text
@@ -187,15 +233,17 @@ def total(bot, updater, user_data):
 def main(updater):
     dp = updater.dispatcher
 
+    dp.add_handler(conv_handler)
     dp.add_handler(MessageHandler(Filters.text, total, pass_user_data=True))
 
     dp.add_handler(CommandHandler("help", help))
-    dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("show", show_keyboard))
     dp.add_handler(CommandHandler("close", close_keyboard))
     dp.add_handler(CommandHandler("stop", stop, pass_user_data=True))
+    dp.add_handler(CommandHandler("start", start, pass_user_data=True))
     dp.add_handler(CommandHandler("RusEng", RusEng, pass_user_data=True))
     dp.add_handler(CommandHandler("EngRus", EngRus, pass_user_data=True))
+    dp.add_handler(CommandHandler("open", open_diary, pass_user_data=True))
     dp.add_handler(CommandHandler("seller", seller_description, pass_user_data=True))
     dp.add_handler(CommandHandler("geokoder", geocoder_description, pass_user_data=True))
     dp.add_handler(CommandHandler("translater", translater_description, pass_user_data=True))
