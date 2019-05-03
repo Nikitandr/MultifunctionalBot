@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import requests
 from time import sleep
 from sys import executable
@@ -64,7 +65,8 @@ def help(bot, update):
                               "Быть переводчиком, для этого напиши /translater\n"
                               "Быть геокодером, для этого напиши /geokoder\n"
                               "Быть продавцем, для этого напиши /seller\n"
-                              "Быть ежидневником, для этого напиши /diary")
+                              "Быть ежидневником, для этого напиши /diary\n"
+                              "Быть будильником, для этого напиши /alarm")
 
 
 def translater_description(bot, update, user_data):
@@ -214,7 +216,47 @@ conv_handler = ConversationHandler(
                                   )
 
 
-def total(bot, updater, user_data):
+def task(bot, job):
+    bot.send_message(job.context, text='Подъёёёём!')
+
+
+def off_alarm(bot, update, chat_data):
+    if 'job' in chat_data:
+        chat_data['job'].schedule_removal()
+        del chat_data['job']
+    update.message.reply_text('Отменил.')
+
+
+def alarm_description(bot, update, user_data):
+    user_data["work"] = "alarm"
+    update.message.reply_text("Теперь я будильник.\n"
+                              "Чтобы отключить функцию напиши /stop\n"
+                              "Чтобы отменить будильник напиши /off_alarm\n"
+                              "Чтобы поставить будильник напиши время в формате Часы:Минуты")
+
+
+def alarm(time_to):
+    time_now, difference = (time.strftime("%H:%M", time.localtime())).split(":"), []
+    for i in range(2):
+        tim = int(time_to[i]) - int(time_now[i])
+        if tim < 0:
+            if i == 0:
+                tim = 24 + tim
+                difference.append(tim)
+            else:
+                tim = 60 + tim
+                difference.append(tim)
+        elif tim > 0:
+            if i == 0:
+                tim = tim - 1
+            difference.append(tim)
+        else:
+            difference.append(tim)
+    seconds = (difference[0]*60 + difference[1])*60
+    return seconds
+
+
+def total(bot, updater, job_queue, chat_data, user_data):
     if user_data["work"] == "geocoder":
         address = updater.message.text
         static_api_request = geocoder(address)
@@ -228,13 +270,19 @@ def total(bot, updater, user_data):
         answer, new_item = updater.message.text, item()
         ans = seller(answer, new_item)
         updater.message.reply_text(ans)
+    elif user_data["work"] == "alarm":
+        time_to = updater.message.text.split(":")
+        delay = alarm(time_to)
+        job = job_queue.run_once(task, delay, context=updater.message.chat_id)
+        chat_data['job'] = job
+        updater.message.reply_text("Поставил.")
 
 
 def main(updater):
     dp = updater.dispatcher
 
     dp.add_handler(conv_handler)
-    dp.add_handler(MessageHandler(Filters.text, total, pass_user_data=True))
+    dp.add_handler(MessageHandler(Filters.text, total, pass_job_queue=True, pass_chat_data=True, pass_user_data=True))
 
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("show", show_keyboard))
@@ -244,6 +292,8 @@ def main(updater):
     dp.add_handler(CommandHandler("RusEng", RusEng, pass_user_data=True))
     dp.add_handler(CommandHandler("EngRus", EngRus, pass_user_data=True))
     dp.add_handler(CommandHandler("open", open_diary, pass_user_data=True))
+    dp.add_handler(CommandHandler("off_alarm", off_alarm, pass_chat_data=True))
+    dp.add_handler(CommandHandler("alarm", alarm_description, pass_user_data=True))
     dp.add_handler(CommandHandler("seller", seller_description, pass_user_data=True))
     dp.add_handler(CommandHandler("geokoder", geocoder_description, pass_user_data=True))
     dp.add_handler(CommandHandler("translater", translater_description, pass_user_data=True))
